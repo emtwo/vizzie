@@ -1,0 +1,23 @@
+<html>
+<head>
+	<script src="visualize.js"></script>
+	<link rel="stylesheet" type="text/css" href="ocr.css">
+</head>
+<body>
+	<div id="main-container" style="text-align: left; width: 800px; margin: 0 auto;">
+		<div id="section1">
+			<h1>Choose Templates</h1>
+			<form id="form1">
+				<p>Templates Tag: <input id="tag" type="text"> </p>
+				<input type="button" value="Fetch Templates" onclick="visualize.requestTemplates()">
+			</form>
+		</div>
+		<div id="section2" style="visibility:hidden;">
+			<h1>Choose Visualizations</h1>
+			<form id="form2">
+				<ul id="template_list"></ul>
+			</form>
+		</div>
+	</div>
+</body>
+</html>
