@@ -1,13 +1,15 @@
 <html>
 <head>
 	<script src="visualize.js"></script>
-	<link rel="stylesheet" type="text/css" href="ocr.css">
 </head>
 <body>
 	<div id="main-container" style="text-align: left; width: 800px; margin: 0 auto;">
 		<div id="section1">
-			<h1>Choose Templates</h1>
+			<h1>Welcome to Vizzie!</h1>
+			Let's start by setting some dashboard details and choosing your templates tag.
 			<form id="form1">
+				<p>Project Title: <input id="project_title" type="text"> </p>
+				<p>Dashboard Title: <input id="dash_title" type="text"> </p>
 				<p>Templates Tag: <input id="tag" type="text"> </p>
 				<input type="button" value="Fetch Templates" onclick="visualize.requestTemplates()">
 			</form>
@@ -16,7 +18,11 @@
 			<h1>Choose Visualizations</h1>
 			<form id="form2">
 				<ul id="template_list"></ul>
+				<input type="button" value="Generate Dashboard" onclick="visualize.generateDashboard()">
 			</form>
+		</div>
+		<div id="section3" style="visibility:hidden;">
+			<iframe id="dashboard" width="800px" height="500px" src="https://sql.telemetry.mozilla.org/public/dashboards/MOEDYGV2veR5g6Y7ymvruNd8mzlSveaT3Wg34PQG?org_slug=default"></iframe> 
 		</div>
 	</div>
 </body>

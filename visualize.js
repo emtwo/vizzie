@@ -1,34 +1,48 @@
-/**
-  * This module creates a 200x200 pixel canvas for a user to draw
-  * digits. The digits can either be used to train the neural network
-  * or to test the network's current prediction for that digit.
-  *
-  * To simplify computation, the 200x200px canvas is translated as a 20x20px
-  * canvas to be processed as an input array of 1s (white) and 0s (black) on
-  * on the server side. Each new translated pixel's size is 10x10px
-  *
-  * When training the network, traffic to the server can be reduced by batching
-  * requests to train based on BATCH_SIZE.
-  */
-var visualize = {
+let visualize = {
   // Server Variables
   PORT: "8000",
   HOST: "http://localhost",
 
   requestTemplates() {
-    let templateTag = document.getElementById("tag").value;
-    if (!templateTag) {
+    this._templateTag = document.getElementById("tag").value;
+    if (!this._templateTag) {
       alert("Please enter a tag to view available templates");
       return;
     }
 
-    let json = { templateTag };
-    alert("Requesting templates for \"" + templateTag + "\"");
+    let json = { templateTag: this._templateTag };
+    alert("Requesting templates for \"" + this._templateTag + "\"");
     this.sendData(json);
   },
 
-  _addTemplateVariables(variables, list) {
+  generateDashboard() {
+    let dashboardRequest = {
+      templateTag: this._templateTag,
+      projectTitle: document.getElementById("project_title").value,
+      dashboardTitle: document.getElementById("dash_title").value
+    };
+    let graphData = {};
+    for (let graphName in this._chartInfo) {
+      let chartSelected = this._chartInfo[graphName].chartSelected.checked;
+      if (!chartSelected) {
+        continue;
+      }
+      graphData[graphName] = {};
+      for (let param in this._chartInfo[graphName]["chartValues"]) {
+        if (!param) {
+          alert("You're missing a parameter for graphName!");
+          return;
+        }
+        graphData[graphName][param] = this._chartInfo[graphName]["chartValues"][param].value;
+      }
+    }
+    dashboardRequest["params"] = graphData;
+    this.sendData(dashboardRequest);
+  },
+
+  _addTemplateVariables(name, variables, list) {
     let allVariables = document.createElement("div");
+    this._chartInfo[name]["chartValues"] = {};
     for (variable of variables) {
       // A template variable is a paragraph with text.
       let varParagraph = document.createElement("p");
@@ -37,6 +51,7 @@ var visualize = {
 
       // A template variable has input to set its value.
       let varInput = document.createElement("input");
+      this._chartInfo[name]["chartValues"][variable] = varInput;
       varInput.type = "text";
 
       varParagraph.appendChild(varText);
@@ -53,6 +68,7 @@ var visualize = {
     let label = document.createElement("label");
     let checkbox = document.createElement("input");
     checkbox.type = "checkbox";
+    this._chartInfo[text]["chartSelected"] = checkbox;
 
     label.appendChild(checkbox);
     label.appendChild(document.createTextNode(text));
@@ -61,13 +77,29 @@ var visualize = {
   },
 
   _addTemplateOptions(templates) {
-    let list = document.getElementById("template_list")
+    /**
+     *  this._chartInfo is formatted as:
+     *
+     *  {
+     *    <chart name>: {
+     *      "chartSelected: <checkbox dom element>,
+     *      "chartValues": {
+     *        <chart parameter name>: <chart dom element>,
+     *        ........
+     *      }
+     *    }
+     *  }
+    **/
+    this._chartInfo = {};
+    let list = document.getElementById("template_list");
 
-    for (template of templates){
+    for (template of templates) {
+      this._chartInfo[template["name"]] = {};
       let checkbox = this._createCheckbox(template["name"]);
       list.appendChild(checkbox);
 
-      let variables = this._addTemplateVariables(template["variables"], list);
+      let variables = this._addTemplateVariables(
+          template["name"], template["variables"], list);
       variables.style.visibility = "hidden";
       variables.style.display = "none";
       list.appendChild(variables);
@@ -90,10 +122,15 @@ var visualize = {
       return;
     }
     let responseJSON = JSON.parse(xmlHttp.responseText);
-    if (xmlHttp.responseText && responseJSON.templates) {
-      this._addTemplateOptions(responseJSON.templates);
+    if (xmlHttp.responseText) {
+      if (responseJSON.templates) {
+        this._addTemplateOptions(responseJSON.templates);
+        document.getElementById("section2").style.visibility = "visible";
+      } else if (responseJSON.public_url) {
+        document.getElementById("dashboard").src = responseJSON.public_url;
+        document.getElementById("section3").style.visibility = "visible";
+      }
     }
-    document.getElementById("section2").style.visibility = "visible";
   },
 
   _onError(e) {
