@@ -40,6 +40,7 @@ class JSONHandler(BaseHTTPServer.BaseHTTPRequestHandler):
       dash._add_template_to_dashboard(
           template, chart_data, adjusted_title, VizWidth.WIDE, "")
 
+    print dash.public_url
     return {"public_url": dash.public_url,}
 
   def handle_template_tag(self, tag):

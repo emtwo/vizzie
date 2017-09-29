@@ -16,6 +16,7 @@ let visualize = {
   },
 
   generateDashboard() {
+    alert("Generating your Redash Dashboard!")
     let dashboardRequest = {
       templateTag: this._templateTag,
       projectTitle: document.getElementById("project_title").value,
